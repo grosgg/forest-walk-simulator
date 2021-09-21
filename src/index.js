@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import Tent from "./Tent";
+import Tent from "./Tent.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -18,15 +18,21 @@ document.body.appendChild(renderer.domElement);
 const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
 
 // adding tent with entrance
-const { tentGroup } = new Tent(0, 0, 1);
-console.log("tent mesh", tentGroup);
-scene.add(tentGroup);
+const { group } = new Tent(0, 0, 0);
+scene.add(group);
+
+// test for showing random tents
+for (let i = 0; i < 10; i++) {
+  const randomPos = Math.random() < 0.5 ? -1 : 1;
+  const randomX = Math.floor(Math.random() * randomPos * 10) * i;
+  const randomZ = Math.floor(Math.random() * randomPos * 5) * i;
+  const { group } = new Tent(randomX, 0, randomZ);
+  scene.add(group);
+}
 
 camera.position.z = 5;
-
 const animate = function () {
   requestAnimationFrame(animate);
 
@@ -35,3 +41,6 @@ const animate = function () {
 
   renderer.render(scene, camera);
 };
+
+// scene.add(tent.group);
+animate();
