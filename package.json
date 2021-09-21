@@ -1,0 +1,29 @@
+{
+  "name": "forest-walk-simulator",
+  "version": "0.0.1",
+  "description": "Walk in a 3D forest",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --open --mode=development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grosgg/forest-walk-simulator.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grosgg/forest-walk-simulator/issues"
+  },
+  "homepage": "https://github.com/grosgg/forest-walk-simulator#readme",
+  "dependencies": {
+    "three": "^0.132.2"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^5.3.2",
+    "webpack": "^5.53.0",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.2.1"
+  }
+}
