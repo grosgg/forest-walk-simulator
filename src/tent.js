@@ -7,7 +7,7 @@ import tentImage from "./images/tent_color.jpeg";
 export default class Tent {
   constructor(x, y, z) {
     // tent
-    const tentGeometry = new THREE.ConeGeometry(1, 1, 4);
+    const tentGeometry = new THREE.ConeGeometry(2, 2, 4);
     const tentTexture = new THREE.TextureLoader().load(tentImage);
     const tentMaterial = new THREE.MeshBasicMaterial({
       map: tentTexture,

@@ -52,7 +52,7 @@ controls.update();
 for (let i = 1; i < 10; i++) {
   const randomX = Math.floor(Math.random() * 10 + 2) * i;
   const randomZ = Math.floor(Math.random() * 5 + 2) * i;
-  const { tentMesh } = new Tent(randomX, 0.5, randomZ);
+  const { tentMesh } = new Tent(randomX, 1, randomZ);
   scene.add(tentMesh);
 }
 
