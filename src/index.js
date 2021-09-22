@@ -18,6 +18,7 @@ import Ground from './Ground.js';
 import Music from './audio/chill.mp3';
 
 import ConicalTree from './ConicalTree.js';
+import TreeTile from './Prefabs.js';
 import { GridHelper, MathUtils } from 'three';
 
 const PF = require('pathfinding');
@@ -87,8 +88,7 @@ for (let z = 0; z < GRID_SIZE; z++) {
   for (let x = 0; x < GRID_SIZE; x++) {
     if (matrix[z][x] > 0.4) {
       matrix[z][x] = 1;
-      let randPos = MathUtils.randInt(1, 3) + 0.5;
-      scene.add(new ConicalTree(x * TILE_SIZE + randPos, z * TILE_SIZE + randPos).group);
+      scene.add(new TreeTile(x * TILE_SIZE, z * TILE_SIZE).group);
     } else {
       matrix[z][x] = 0;
     }
