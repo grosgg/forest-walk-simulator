@@ -13,6 +13,7 @@ import ForestTextureNY from './images/skybox/ny.jpg';
 import ForestTextureNZ from './images/skybox/nz.jpg';
 
 import ConicalTree from './ConicalTree.js';
+import { GridHelper, MathUtils } from 'three';
 
 // Scene + camera setup
 const scene = new THREE.Scene();
@@ -59,13 +60,19 @@ scene.add(ground.mesh);
 for (let z = 0; z < GRID_SIZE; z++) {
   for (let x = 0; x < GRID_SIZE; x++) {
     if (layout[z][x] > 0.4) {
-      scene.add(new ConicalTree(x * TILE_SIZE, z * TILE_SIZE).group);
+      let randPos = MathUtils.randInt(1, 3) + 0.5;
+      scene.add(new ConicalTree(x * TILE_SIZE + randPos, z * TILE_SIZE + randPos).group);
     }
   }
 }
 
-camera.position.set(MAP_SIZE / 2, 50, MAP_SIZE / 2);
-controls.target = new THREE.Vector3(MAP_SIZE / 2, 0, MAP_SIZE / 2);
+const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
+gridHelper.position.x = MAP_SIZE / 2;
+gridHelper.position.z = MAP_SIZE / 2;
+scene.add(gridHelper)
+
+camera.position.set(-15, 15, 15);
+controls.target = new THREE.Vector3(TILE_SIZE * TILE_SIZE, -5, TILE_SIZE * TILE_SIZE);
 
 controls.update();
 
