@@ -7,26 +7,20 @@ import tentImage from "./images/tent_color.jpeg";
 export default class Tent {
   constructor(x, y, z) {
     // tent
-    const geometry = new THREE.ConeGeometry(1, 1, 4);
-    const texture = new THREE.TextureLoader().load(tentImage);
+    const tentGeometry = new THREE.ConeGeometry(1, 1, 4);
+    const tentTexture = new THREE.TextureLoader().load(tentImage);
     const tentMaterial = new THREE.MeshBasicMaterial({
-      map: texture,
+      map: tentTexture,
     });
-    const tent = new THREE.Mesh(geometry, tentMaterial);
-
-    console.log("tent", tent);
+    const tentMesh = new THREE.Mesh(tentGeometry, tentMaterial);
 
     // entrance
-    const planeGeometry = new THREE.PlaneGeometry(0.23, 0.2);
+    const entranceGeometry = new THREE.PlaneGeometry(0.23, 0.2);
     const entranceMaterial = new THREE.MeshBasicMaterial({ color: 0x03083c });
-    const entrance = new THREE.Mesh(planeGeometry, entranceMaterial);
-
-    console.log("entrance", entrance);
+    const entranceMesh = new THREE.Mesh(entranceGeometry, entranceMaterial);
 
     // set tent position
-    tent.position.x = x;
-    tent.position.y = y;
-    tent.position.z = z;
+    tent.position.set(x, y, z);
 
     // set entrance position
     entrance.position.x = x - 0.4;
@@ -36,12 +30,9 @@ export default class Tent {
     entrance.rotateY(-0.3);
     entrance.rotateZ(-0.27);
 
-    this.mesh = tent;
-
     const group = new THREE.Group();
-    group.add(tent);
-    group.add(entrance);
-    console.log("group", group);
-    this.group = group;
+    group.add(tentMesh);
+    group.add(entranceMesh);
+    this.tentGroup = group;
   }
 }
