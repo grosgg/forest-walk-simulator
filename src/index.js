@@ -20,6 +20,8 @@ import Music from './audio/chill.mp3';
 import ConicalTree from './ConicalTree.js';
 import { GridHelper, MathUtils } from 'three';
 
+const PF = require('pathfinding');
+
 // Scene + camera setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -56,12 +58,12 @@ audioLoader.load( Music, function( buffer ) {
 });
 
 const simplex = new SimplexNoise();
-let layout = [];
+let matrix = [];
 
 for (let z = 0; z < GRID_SIZE; z++) {
-  layout[z] = new Array(GRID_SIZE);
+  matrix[z] = new Array(GRID_SIZE);
   for (let x = 0; x < GRID_SIZE; x++) {
-    layout[z][x] = simplex.noise2D(x, z);
+    matrix[z][x] = simplex.noise2D(x, z);
   }
 }
 
@@ -83,18 +85,21 @@ scene.add(ground.mesh);
 // Add first layer of obstacles
 for (let z = 0; z < GRID_SIZE; z++) {
   for (let x = 0; x < GRID_SIZE; x++) {
-    if (layout[z][x] > 0.4) {
+    if (matrix[z][x] > 0.4) {
+      matrix[z][x] = 1;
       let randPos = MathUtils.randInt(1, 3) + 0.5;
       scene.add(new ConicalTree(x * TILE_SIZE + randPos, z * TILE_SIZE + randPos).group);
+    } else {
+      matrix[z][x] = 0;
     }
   }
 }
 
-// Pick random destinations
+// Pick random destinations for each area
 const destinations = [];
 for (let z = 0; z < GRID_SIZE; z += AREA_SIZE) {
   for (let x = 0; x < GRID_SIZE; x += AREA_SIZE) {
-    console.log([x, z]);
+    // console.log([x, z]);
     destinations.push([
       Math.floor(Math.random() * ((x + AREA_SIZE - 1) - x + 1) + x),
       Math.floor(Math.random() * ((z + AREA_SIZE - 1) - z + 1) + z),
@@ -103,12 +108,35 @@ for (let z = 0; z < GRID_SIZE; z += AREA_SIZE) {
 }
 console.log(destinations);
 
+// Display temporary flags
 destinations.forEach(destination => {
   const flag = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
     new THREE.MeshBasicMaterial({ color: 0xff0000 })
   );
-  flag.position.set(destination[0] * TILE_SIZE + TILE_SIZE / 2, 0, destination[1] * TILE_SIZE + TILE_SIZE / 2)
+  // Placing the flag in the center
+  flag.position.set(destination[0] * TILE_SIZE + TILE_SIZE / 2, 2, destination[1] * TILE_SIZE + TILE_SIZE / 2)
+  scene.add(flag);
+});
+
+const grid = new PF.Grid(matrix);
+destinations.forEach(destination => {
+  // Making sure destinations are walkable
+  grid.setWalkableAt(destination[0], destination[1], true);
+});
+const finder = new PF.AStarFinder();
+
+const nodes = finder.findPath(destinations[0][0], destinations[0][1], destinations[1][0], destinations[1][1], grid);
+console.log(nodes);
+
+// Display temporary path
+nodes.forEach(node => {
+  const flag = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0x00dddd })
+  );
+  // Placing the flag in the center
+  flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 1, node[1] * TILE_SIZE + TILE_SIZE / 2)
   scene.add(flag);
 });
 
