@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SimplexNoise from 'simplex-noise';
 
-import { MAP_SIZE, TILE_SIZE, GRID_SIZE, AREA_SIZE } from './Constants.js';
+import { MAP_SIZE, TILE_SIZE, GRID_SIZE, AREA_SIZE, OBSTACLE_DENSITY } from './Constants.js';
 import Ground from './Ground.js';
 
 // import ForestTexturePX from './images/skybox/px.jpg';
@@ -61,10 +61,11 @@ audioLoader.load( Music, function( buffer ) {
 const simplex = new SimplexNoise();
 let matrix = [];
 
+// Figure layer of obstacles
 for (let z = 0; z < GRID_SIZE; z++) {
   matrix[z] = new Array(GRID_SIZE);
   for (let x = 0; x < GRID_SIZE; x++) {
-    matrix[z][x] = simplex.noise2D(x, z);
+    matrix[z][x] = simplex.noise2D(x, z) < OBSTACLE_DENSITY ? 1 : 0;
   }
 }
 
@@ -83,30 +84,30 @@ scene.background = new THREE.Color( 'skyblue' );
 const ground = new Ground;
 scene.add(ground.mesh);
 
-// Add first layer of obstacles
-for (let z = 0; z < GRID_SIZE; z++) {
-  for (let x = 0; x < GRID_SIZE; x++) {
-    if (matrix[z][x] > 0.4) {
-      matrix[z][x] = 1;
-      scene.add(new TreeTile(x * TILE_SIZE, z * TILE_SIZE).group);
-    } else {
-      matrix[z][x] = 0;
-    }
-  }
-}
-
 // Pick random destinations for each area
 const destinations = [];
 for (let z = 0; z < GRID_SIZE; z += AREA_SIZE) {
   for (let x = 0; x < GRID_SIZE; x += AREA_SIZE) {
     // console.log([x, z]);
-    destinations.push([
+    const destination = [
       Math.floor(Math.random() * ((x + AREA_SIZE - 1) - x + 1) + x),
       Math.floor(Math.random() * ((z + AREA_SIZE - 1) - z + 1) + z),
-    ]);
+    ];
+    destinations.push(destination);
+    // Make sure no obstacle spawns at destinations
+    matrix[destination[1]][destination[0]] = 0;
   }
 }
 console.log(destinations);
+
+// Place obstacles
+for (let z = 0; z < GRID_SIZE; z++) {
+  for (let x = 0; x < GRID_SIZE; x++) {
+    if (matrix[z][x] === 1) {
+      scene.add(new TreeTile(x * TILE_SIZE, z * TILE_SIZE).group);
+    }
+  }
+}
 
 // Display temporary flags
 destinations.forEach(destination => {
@@ -120,25 +121,43 @@ destinations.forEach(destination => {
 });
 
 const grid = new PF.Grid(matrix);
-destinations.forEach(destination => {
-  // Making sure destinations are walkable
-  grid.setWalkableAt(destination[0], destination[1], true);
-});
 const finder = new PF.AStarFinder();
 
-const nodes = finder.findPath(destinations[0][0], destinations[0][1], destinations[1][0], destinations[1][1], grid);
-console.log(nodes);
+for (let i = 0; i < destinations.length; i++) {
+  const j = i === destinations.length - 1 ? 0 : i + 1;
 
-// Display temporary path
-nodes.forEach(node => {
-  const flag = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x00dddd })
+  // Making sure destinations are walkable
+  grid.setWalkableAt(destinations[i][0], destinations[i][1], true);
+  grid.setWalkableAt(destinations[j][0], destinations[j][1], true);
+
+  const pathGrid = grid.clone();
+  // console.log(i);
+  // console.log(`From ${destinations[i]} to ${destinations[j]}`);
+  const nodes = finder.findPath(
+    destinations[i][0],
+    destinations[i][1],
+    destinations[j][0],
+    destinations[j][1],
+    pathGrid
   );
-  // Placing the flag in the center
-  flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 1, node[1] * TILE_SIZE + TILE_SIZE / 2)
-  scene.add(flag);
-});
+  // console.log(nodes);
+  if (nodes.length === 0) {
+    console.log(`No path rom ${destinations[i]} to ${destinations[j]}!`);
+  }
+
+  // Display temporary path
+  nodes.forEach(node => {
+    const flag = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x00dddd })
+    );
+    // Placing the flag in the center
+    flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 1, node[1] * TILE_SIZE + TILE_SIZE / 2)
+    scene.add(flag);
+  });
+}
+
+
 
 const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
 gridHelper.position.x = MAP_SIZE / 2;
