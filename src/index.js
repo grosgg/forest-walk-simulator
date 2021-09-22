@@ -10,7 +10,7 @@ import ForestTextureNX from './images/skybox/nx.jpg';
 import ForestTextureNY from './images/skybox/ny.jpg';
 import ForestTextureNZ from './images/skybox/nz.jpg';
 
-import Tree from './Tree.js';
+import ConicalTree from './ConicalTree.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -39,8 +39,8 @@ scene.background = skyboxTexture;
 const grid = new Grid;
 scene.add( grid.mesh );
 
-const tree = new Tree
-scene.add(tree)
+const tree = new ConicalTree
+scene.add(tree.group)
 
 // camera.position.set(2, 1.8, 2);
 controls.target = new THREE.Vector3(10, 0, 20);

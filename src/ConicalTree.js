@@ -21,9 +21,11 @@ export default class Tree {
     leaves.position.y = trunk.position.y + 1.75
     leaves.position.x = trunk.position.x
 
-    const group = new THREE.Group();
-    group.add( tunk );
+    const group = new THREE.Object3D();
+    group.add( trunk );
     group.add( leaves );
+
+    this.group = group
 
   }
 }
