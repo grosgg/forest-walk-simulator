@@ -12,6 +12,8 @@ import ForestTextureNZ from './images/skybox/nz.jpg';
 
 import ConicalTree from './ConicalTree.js';
 
+const constants = require('./constants')
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
@@ -39,11 +41,17 @@ scene.background = skyboxTexture;
 const grid = new Grid;
 scene.add( grid.mesh );
 
+const gridHelper = new THREE.GridHelper(10, 10, 0x4aed5f, 0xdb072a);
+gridHelper.position.x = constants.GRID_SIZE / 2;
+gridHelper.position.z = constants.GRID_SIZE / 2;
+scene.add(gridHelper)
+
 const tree = new ConicalTree
 scene.add(tree.group)
+tree.group.position.set(constants.TILE_SIZE / 2, 1, constants.TILE_SIZE / 2);
 
-// camera.position.set(2, 1.8, 2);
-controls.target = new THREE.Vector3(10, 0, 20);
+camera.position.set(-3, 5, -3);
+controls.target = new THREE.Vector3(0, 2, 0);
 controls.update();
 
 // Animate tree
