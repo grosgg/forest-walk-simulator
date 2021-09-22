@@ -1,6 +1,16 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import Tent from "./Tent.js";
+import Grid from "./Grid.js";
+
+import ForestTexturePX from "./images/skybox/px.jpg";
+import ForestTexturePY from "./images/skybox/py.jpg";
+import ForestTexturePZ from "./images/skybox/pz.jpg";
+import ForestTextureNX from "./images/skybox/nx.jpg";
+import ForestTextureNY from "./images/skybox/ny.jpg";
+import ForestTextureNZ from "./images/skybox/nz.jpg";
+
+import Tent from "./Tent";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -15,25 +25,41 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
+camera.position.z = 5;
+const controls = new OrbitControls(camera, renderer.domElement);
 
-// test for showing random tents
-for (let i = 0; i < 10; i++) {
-  const randomPos = Math.random() < 0.5 ? -1 : 1;
-  const randomX = Math.floor(Math.random() * randomPos * 10) * i;
-  const randomZ = Math.floor(Math.random() * randomPos * 5) * i;
-  const { tentGroup } = new Tent(randomX, 0, randomZ);
+const axesHelper = new THREE.AxesHelper(10);
+scene.add(axesHelper);
+
+const skyboxTexture = new THREE.CubeTextureLoader().load([
+  ForestTexturePX,
+  ForestTextureNX,
+  ForestTexturePY,
+  ForestTextureNY,
+  ForestTexturePZ,
+  ForestTextureNZ,
+]);
+scene.background = skyboxTexture;
+
+const grid = new Grid();
+scene.add(grid.mesh);
+
+// camera.position.set(2, 1.8, 2);
+controls.target = new THREE.Vector3(10, 0, 20);
+controls.update();
+
+// generate tent randomly
+for (let i = 1; i < 10; i++) {
+  const randomX = Math.floor(Math.random() * 10 + 2) * i;
+  const randomZ = Math.floor(Math.random() * 5 + 2) * i;
+  console.log("randomx", randomX);
+  console.log("randomz", randomZ);
+  const { tentGroup } = new Tent(randomX, 2, randomZ);
   scene.add(tentGroup);
 }
 
-camera.position.z = 5;
 const animate = function () {
   requestAnimationFrame(animate);
-
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
 
   renderer.render(scene, camera);
 };
