@@ -10,6 +10,8 @@ import ForestTextureNX from './images/skybox/nx.jpg';
 import ForestTextureNY from './images/skybox/ny.jpg';
 import ForestTextureNZ from './images/skybox/nz.jpg';
 
+import ConicalTree from './ConicalTree.js';
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
@@ -22,6 +24,7 @@ const controls = new OrbitControls( camera, renderer.domElement );
 
 const axesHelper = new THREE.AxesHelper(10);
 scene.add( axesHelper );
+
 
 const skyboxTexture = new THREE.CubeTextureLoader().load([
   ForestTexturePX,
@@ -36,10 +39,14 @@ scene.background = skyboxTexture;
 const grid = new Grid;
 scene.add( grid.mesh );
 
+const tree = new ConicalTree
+scene.add(tree.group)
+
 // camera.position.set(2, 1.8, 2);
 controls.target = new THREE.Vector3(10, 0, 20);
 controls.update();
 
+// Animate tree
 const animate = function () {
   requestAnimationFrame( animate );
 
