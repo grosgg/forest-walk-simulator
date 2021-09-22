@@ -64,7 +64,7 @@ for (let z = 0; z < GRID_SIZE; z++) {
   }
 }
 
-camera.position.set(0, 10, 0);
+camera.position.set(MAP_SIZE / 2, 50, MAP_SIZE / 2);
 controls.target = new THREE.Vector3(MAP_SIZE / 2, 0, MAP_SIZE / 2);
 
 controls.update();
