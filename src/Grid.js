@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import GrassTexture from './images/grass.jpg';
 
-const TILE_SIZE = 10;
+const TILE_SIZE = 5;
 const GRID_SIZE = 100;
 
 export default class Grid {
