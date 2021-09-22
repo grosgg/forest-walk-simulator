@@ -59,7 +59,7 @@ scene.add(ground.mesh);
 
 for (let z = 0; z < GRID_SIZE; z++) {
   for (let x = 0; x < GRID_SIZE; x++) {
-    if (layout[z][x] > 0) {
+    if (layout[z][x] > 0.4) {
       let randPos = MathUtils.randInt(1, 3) + 0.5;
       scene.add(new ConicalTree(x * TILE_SIZE + randPos, z * TILE_SIZE + randPos).group);
     }
