@@ -50,14 +50,6 @@ controls.update();
 const animate = function () {
   requestAnimationFrame( animate );
 
-<<<<<<< HEAD
-  // cube.rotation.x += 0.01;
-  // trunk.rotation.y += 0.01;
-  // cone.rotation.x += 0.01;
-  // leaves.rotation.y += 0.01;
-
-=======
->>>>>>> jeremy/grid
   renderer.render( scene, camera );
 };
 
