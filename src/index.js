@@ -11,6 +11,10 @@ import ForestTexturePZ from './images/skybox/pz.jpg';
 import ForestTextureNX from './images/skybox/nx.jpg';
 import ForestTextureNY from './images/skybox/ny.jpg';
 import ForestTextureNZ from './images/skybox/nz.jpg';
+// Emile's WIP
+// import Music from './audio/Shithesizer_numero_deux.mp3';
+// Chill chiptune
+import Music from './audio/chill.mp3';
 
 import ConicalTree from './ConicalTree.js';
 import { GridHelper, MathUtils } from 'three';
@@ -31,6 +35,24 @@ const controls = new OrbitControls( camera, renderer.domElement );
 // Add axes helper
 const axesHelper = new THREE.AxesHelper(10);
 scene.add(axesHelper);
+
+// Audio
+// create an AudioListener and add it to the camera
+const listener = new THREE.AudioListener();
+camera.add( listener );
+
+// create a global audio source
+const sound = new THREE.Audio( listener );
+
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load( Music, function( buffer ) {
+  sound.setBuffer( buffer );
+  sound.setLoop( true );
+  sound.setVolume( 0.15 );
+  // comment out to stop when devving
+  sound.play();
+});
 
 const simplex = new SimplexNoise();
 let layout = [];
