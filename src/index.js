@@ -2,15 +2,16 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SimplexNoise from 'simplex-noise';
 
-import { MAP_SIZE, TILE_SIZE, GRID_SIZE } from './Constants.js';
+import { MAP_SIZE, TILE_SIZE, GRID_SIZE, AREA_SIZE } from './Constants.js';
 import Ground from './Ground.js';
 
-import ForestTexturePX from './images/skybox/px.jpg';
-import ForestTexturePY from './images/skybox/py.jpg';
-import ForestTexturePZ from './images/skybox/pz.jpg';
-import ForestTextureNX from './images/skybox/nx.jpg';
-import ForestTextureNY from './images/skybox/ny.jpg';
-import ForestTextureNZ from './images/skybox/nz.jpg';
+// import ForestTexturePX from './images/skybox/px.jpg';
+// import ForestTexturePY from './images/skybox/py.jpg';
+// import ForestTexturePZ from './images/skybox/pz.jpg';
+// import ForestTextureNX from './images/skybox/nx.jpg';
+// import ForestTextureNY from './images/skybox/ny.jpg';
+// import ForestTextureNZ from './images/skybox/nz.jpg';
+
 // Emile's WIP
 // import Music from './audio/Shithesizer_numero_deux.mp3';
 // Chill chiptune
@@ -52,56 +53,76 @@ audioLoader.load( Music, function( buffer ) {
   sound.setLoop( true );
   sound.setVolume( 0.15 );
   // comment out to stop when devving
-  sound.play();
+  // sound.play();
 });
 
 const simplex = new SimplexNoise();
 let layout = [];
 
-for (let z = 0; z < MAP_SIZE; z += TILE_SIZE) {
+for (let z = 0; z < GRID_SIZE; z++) {
   layout[z] = new Array(GRID_SIZE);
-  for (let x = 0; x < MAP_SIZE; x += TILE_SIZE) {
+  for (let x = 0; x < GRID_SIZE; x++) {
     layout[z][x] = simplex.noise2D(x, z);
   }
 }
 
 // Add skybox
-const skyboxTexture = new THREE.CubeTextureLoader().load([
-  ForestTexturePX,
-  ForestTextureNX,
-  ForestTexturePY,
-  ForestTextureNY,
-  ForestTexturePZ,
-  ForestTextureNZ,
-]);
-scene.background = skyboxTexture;
+// const skyboxTexture = new THREE.CubeTextureLoader().load([
+//   ForestTexturePX,
+//   ForestTextureNX,
+//   ForestTexturePY,
+//   ForestTextureNY,
+//   ForestTexturePZ,
+//   ForestTextureNZ,
+// ]);
+scene.background = new THREE.Color( 'skyblue' );
 
 // Add ground
 const ground = new Ground;
 scene.add(ground.mesh);
-console.log("ground pos: " + ground.position)
 
-// entire map is 10 "tiles" that are size 5x5
-for (let z = 0; z < MAP_SIZE; z += TILE_SIZE) {
-  for (let x = 0; x < MAP_SIZE; x += TILE_SIZE) {
+// Add first layer of obstacles
+for (let z = 0; z < GRID_SIZE; z++) {
+  for (let x = 0; x < GRID_SIZE; x++) {
     if (layout[z][x] > 0.4) {
-      console.log("Setting up tree tile at " + x + " " + z)
+      // console.log("Setting up tree tile at " + x + " " + z)
       // TreeTile randomly places trees within the 5x5 tile based on world coords x,z
-      scene.add(new TreeTile(x, z).group);
+      scene.add(new TreeTile(x * TILE_SIZE, z * TILE_SIZE).group);
     }
   }
 }
+
+// Pick random destinations
+const destinations = [];
+for (let z = 0; z < GRID_SIZE; z += AREA_SIZE) {
+  for (let x = 0; x < GRID_SIZE; x += AREA_SIZE) {
+    console.log([x, z]);
+    destinations.push([
+      Math.floor(Math.random() * ((x + AREA_SIZE - 1) - x + 1) + x),
+      Math.floor(Math.random() * ((z + AREA_SIZE - 1) - z + 1) + z),
+    ]);
+  }
+}
+console.log(destinations);
+
+destinations.forEach(destination => {
+  const flag = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  );
+  flag.position.set(destination[0] * TILE_SIZE + TILE_SIZE / 2, 0, destination[1] * TILE_SIZE + TILE_SIZE / 2)
+  scene.add(flag);
+});
 
 const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
 gridHelper.position.x = MAP_SIZE / 2;
 gridHelper.position.z = MAP_SIZE / 2;
 scene.add(gridHelper)
 
-camera.position.set(MAP_SIZE / 2, 50, MAP_SIZE / 2);
+camera.position.set(MAP_SIZE / 2, 80, MAP_SIZE / 2);
 controls.target = new THREE.Vector3(MAP_SIZE / 2, 0, MAP_SIZE / 2);
 
 controls.update();
-
 console.log(scene);
 
 const animate = function () {
