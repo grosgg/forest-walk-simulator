@@ -13,6 +13,7 @@ import ForestTextureNY from './images/skybox/ny.jpg';
 import ForestTextureNZ from './images/skybox/nz.jpg';
 
 import ConicalTree from './ConicalTree.js';
+import TreeTile from './Prefabs.js';
 import { GridHelper, MathUtils } from 'three';
 
 // Scene + camera setup
@@ -35,9 +36,9 @@ scene.add(axesHelper);
 const simplex = new SimplexNoise();
 let layout = [];
 
-for (let z = 0; z < GRID_SIZE; z++) {
+for (let z = 0; z < MAP_SIZE; z += TILE_SIZE) {
   layout[z] = new Array(GRID_SIZE);
-  for (let x = 0; x < GRID_SIZE; x++) {
+  for (let x = 0; x < MAP_SIZE; x += TILE_SIZE) {
     layout[z][x] = simplex.noise2D(x, z);
   }
 }
@@ -56,12 +57,15 @@ scene.background = skyboxTexture;
 // Add ground
 const ground = new Ground;
 scene.add(ground.mesh);
+console.log("ground pos: " + ground.position)
 
-for (let z = 0; z < GRID_SIZE; z++) {
-  for (let x = 0; x < GRID_SIZE; x++) {
+// entire map is 10 "tiles" that are size 5x5
+for (let z = 0; z < MAP_SIZE; z += TILE_SIZE) {
+  for (let x = 0; x < MAP_SIZE; x += TILE_SIZE) {
     if (layout[z][x] > 0.4) {
-      let randPos = MathUtils.randInt(1, 3) + 0.5;
-      scene.add(new ConicalTree(x * TILE_SIZE + randPos, z * TILE_SIZE + randPos).group);
+      console.log("Setting up tree tile at " + x + " " + z)
+      // TreeTile randomly places trees within the 5x5 tile based on world coords x,z
+      scene.add(new TreeTile(x, z).group);
     }
   }
 }
