@@ -1,12 +1,21 @@
 import * as THREE from 'three';
+import SimplexNoise from 'simplex-noise';
 
 import GrassTexture from './images/grass.jpg';
-
-const TILE_SIZE = 5;
-const GRID_SIZE = 100;
-
+import { TILE_SIZE, GRID_SIZE } from './Constants.js';
 export default class Grid {
   constructor() {
+    const simplex = new SimplexNoise();
+    let layout = [];
+
+    for (let z = 0; z < GRID_SIZE; z++) {
+      layout[z] = new Array(GRID_SIZE);
+      for (let x = 0; x < GRID_SIZE; x++) {
+        layout[z][x] = simplex.noise2D(x, z);
+      }
+    }
+    console.log(layout);
+
     const geometry = new THREE.BufferGeometry();
 
     const vertices = new Float32Array( [
