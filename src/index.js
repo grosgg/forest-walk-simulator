@@ -18,6 +18,7 @@ import Ground from './Ground.js';
 import Music from './audio/chill.mp3';
 
 import ConicalTree from './ConicalTree.js';
+import TreeTile from './Prefabs.js';
 import { GridHelper, MathUtils } from 'three';
 
 // Scene + camera setup
@@ -84,8 +85,9 @@ scene.add(ground.mesh);
 for (let z = 0; z < GRID_SIZE; z++) {
   for (let x = 0; x < GRID_SIZE; x++) {
     if (layout[z][x] > 0.4) {
-      let randPos = MathUtils.randInt(1, 3) + 0.5;
-      scene.add(new ConicalTree(x * TILE_SIZE + randPos, z * TILE_SIZE + randPos).group);
+      // console.log("Setting up tree tile at " + x + " " + z)
+      // TreeTile randomly places trees within the 5x5 tile based on world coords x,z
+      scene.add(new TreeTile(x * TILE_SIZE, z * TILE_SIZE).group);
     }
   }
 }
