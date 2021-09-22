@@ -93,8 +93,8 @@ gridHelper.position.x = MAP_SIZE / 2;
 gridHelper.position.z = MAP_SIZE / 2;
 scene.add(gridHelper)
 
-camera.position.set(-15, 15, 15);
-controls.target = new THREE.Vector3(TILE_SIZE * TILE_SIZE, -5, TILE_SIZE * TILE_SIZE);
+camera.position.set(MAP_SIZE / 2, 50, MAP_SIZE / 2);
+controls.target = new THREE.Vector3(MAP_SIZE / 2, 0, MAP_SIZE / 2);
 
 controls.update();
 
