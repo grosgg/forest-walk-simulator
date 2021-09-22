@@ -12,6 +12,8 @@ import ForestTextureNZ from "./images/skybox/nz.jpg";
 
 import Tent from "./Tent";
 
+import ConicalTree from "./ConicalTree.js";
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -44,18 +46,14 @@ scene.background = skyboxTexture;
 const grid = new Grid();
 scene.add(grid.mesh);
 
+const tree = new ConicalTree();
+scene.add(tree.group);
+
 // camera.position.set(2, 1.8, 2);
 controls.target = new THREE.Vector3(10, 0, 20);
 controls.update();
 
-// generate tent randomly
-for (let i = 1; i < 10; i++) {
-  const randomX = Math.floor(Math.random() * 10 + 2) * i;
-  const randomZ = Math.floor(Math.random() * 5 + 2) * i;
-  const { tentMesh } = new Tent(randomX, 1, randomZ);
-  scene.add(tentMesh);
-}
-
+// Animate tree
 const animate = function () {
   requestAnimationFrame(animate);
 
