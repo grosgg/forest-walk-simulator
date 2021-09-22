@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-import TrunkTexture from './images/trees/trunk-1.jpeg';
-import LeafTexture from './images/trees/leaves-1.jpeg';
+// import TrunkTexture from './images/trees/trunk-1.jpeg';
+// import LeafTexture from './images/trees/leaves-1.jpeg';
 import { TILE_SIZE } from './Constants.js';
 
 export default class Tree {
