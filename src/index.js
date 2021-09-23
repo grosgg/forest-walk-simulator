@@ -1,8 +1,18 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SimplexNoise from 'simplex-noise';
 
-import { MAP_SIZE, TILE_SIZE, GRID_SIZE, AREA_SIZE, OBSTACLE_DENSITY } from './Constants.js';
+import {
+  MAP_SIZE,
+  TILE_SIZE,
+  GRID_SIZE,
+  AREA_SIZE,
+  OBSTACLE_DENSITY,
+  CAMERA_HEIGHT,
+  SPEED
+} from './Constants.js';
+
+import Navigation from './Navigation.js';
 import Ground from './Ground.js';
 
 // import ForestTexturePX from './images/skybox/px.jpg';
@@ -17,9 +27,8 @@ import Ground from './Ground.js';
 // Chill chiptune
 import Music from './audio/chill.mp3';
 
-import ConicalTree from './ConicalTree.js';
 import TreeTile from './Prefabs.js';
-import { GridHelper, MathUtils } from 'three';
+import { GridHelper } from 'three';
 
 const PF = require('pathfinding');
 
@@ -33,9 +42,6 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-// Add controls
-const controls = new OrbitControls( camera, renderer.domElement );
-
 // Add axes helper
 const axesHelper = new THREE.AxesHelper(10);
 scene.add(axesHelper);
@@ -43,10 +49,10 @@ scene.add(axesHelper);
 // Audio
 // create an AudioListener and add it to the camera
 const listener = new THREE.AudioListener();
-camera.add( listener );
+camera.add(listener);
 
 // create a global audio source
-const sound = new THREE.Audio( listener );
+const sound = new THREE.Audio(listener);
 
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new THREE.AudioLoader();
@@ -98,7 +104,7 @@ for (let z = 0; z < GRID_SIZE; z += AREA_SIZE) {
     matrix[destination[1]][destination[0]] = 0;
   }
 }
-console.log(destinations);
+// console.log(destinations);
 
 // Place obstacles
 for (let z = 0; z < GRID_SIZE; z++) {
@@ -122,6 +128,7 @@ destinations.forEach(destination => {
 
 const grid = new PF.Grid(matrix);
 const finder = new PF.AStarFinder();
+const path = [];
 
 for (let i = 0; i < destinations.length; i++) {
   const j = i === destinations.length - 1 ? 0 : i + 1;
@@ -142,7 +149,7 @@ for (let i = 0; i < destinations.length; i++) {
   );
   // console.log(nodes);
   if (nodes.length === 0) {
-    console.log(`No path rom ${destinations[i]} to ${destinations[j]}!`);
+    console.log(`No path from ${destinations[i]} to ${destinations[j]}!`);
   }
 
   // Display temporary path
@@ -155,25 +162,28 @@ for (let i = 0; i < destinations.length; i++) {
     flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 1, node[1] * TILE_SIZE + TILE_SIZE / 2)
     scene.add(flag);
   });
+
+  // Make one complete list of path nodes
+  path.push(...nodes);
 }
-
-
 
 const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
 gridHelper.position.x = MAP_SIZE / 2;
 gridHelper.position.z = MAP_SIZE / 2;
 scene.add(gridHelper)
 
-camera.position.set(MAP_SIZE / 2, 80, MAP_SIZE / 2);
-controls.target = new THREE.Vector3(MAP_SIZE / 2, 0, MAP_SIZE / 2);
+const nav = new Navigation(path, camera, renderer);
+// console.log(nav);
 
-controls.update();
-console.log(scene);
+const animate = () => {
+  // setTimeout( () => {
+    requestAnimationFrame( animate );
+  // }, 500 );
 
-const animate = function () {
-  requestAnimationFrame(animate);
+  nav.setDestination();
+  nav.move();
 
-  renderer.render(scene, camera);
+  renderer.render(scene, nav.camera);
 };
 
 animate();
