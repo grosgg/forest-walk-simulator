@@ -178,9 +178,8 @@ const nav = new Navigation(path, camera, renderer);
 const animate = () => {
   // setTimeout( () => {
     requestAnimationFrame( animate );
-  // }, 500 );
+  // }, 50 );
 
-  nav.setDestination();
   nav.move();
 
   renderer.render(scene, nav.camera);

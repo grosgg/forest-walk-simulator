@@ -19,23 +19,28 @@ export default class Navigation {
     this.camera.lookAt(this.nextNode());
   }
 
-  setDestination() {
-    if (this.camera.position.distanceTo(this.nextNode()) < SPEED) {
-      this.nodeIndex++;
-      this.camera.lookAt(this.nextNode());
-    }
-  }
-
   move() {
     // console.log('camera', this.camera.position);
     // console.log('nextNode', this.nextNode());
 
     this.camera.getWorldDirection(this.direction);
-    this.direction.round().multiplyScalar(SPEED);
+    this.roundVectorDecimals(this.direction);
     // console.log('direction', this.direction);
 
-    this.camera.position.add(this.direction);
-    this.roundCameraPosition(this.camera);
+    if (this.isNodeReached()) {
+      // console.log('sub', this.nextNode(2).sub(this.nextNode(1)).normalize());
+      if (this.nextNode(2).sub(this.nextNode(1)).normalize().equals(this.direction)) {
+        this.nodeIndex++;
+      } else {
+        this.camera.rotation.y += 1 * Math.PI / 180;
+      }
+    } else {
+      this.direction.round();
+      this.direction.multiplyScalar(SPEED);
+
+      this.camera.position.add(this.direction);
+      this.roundVectorDecimals(this.camera.position);
+    }
   }
 
   nextNode(ahead = 1) {
@@ -46,11 +51,15 @@ export default class Navigation {
     );
   }
 
-  roundCameraPosition(camera) {
-    camera.position.set(
-      Math.round(camera.position.x * 100) / 100,
-      CAMERA_HEIGHT,
-      Math.round(camera.position.z * 100) / 100
-    );
+  roundVectorDecimals(vector) {
+    vector.set(
+      Math.round(vector.x * 100) / 100,
+      Math.round(vector.y * 100) / 100,
+      Math.round(vector.z * 100) / 100
+    )
+  }
+
+  isNodeReached() {
+    return this.camera.position.distanceTo(this.nextNode()) < SPEED
   }
 }
