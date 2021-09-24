@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import gsap from 'gsap';
 
 import { CAMERA_HEIGHT, SPEED, TILE_CENTER_OFFSET, TILE_SIZE } from './Constants';
 
@@ -28,19 +29,60 @@ export default class Navigation {
     // console.log('direction', this.direction);
 
     if (this.isNodeReached()) {
-      // console.log('sub', this.nextNode(2).sub(this.nextNode(1)).normalize());
-      if (this.nextNode(2).sub(this.nextNode(1)).normalize().equals(this.direction)) {
-        this.nodeIndex++;
-      } else {
-        this.camera.rotation.y += 1 * Math.PI / 180;
-      }
+      this.turn();
     } else {
-      this.direction.round();
-      this.direction.multiplyScalar(SPEED);
-
-      this.camera.position.add(this.direction);
-      this.roundVectorDecimals(this.camera.position);
+      this.walk();
     }
+  }
+
+  turn() {
+    const nextDirection = this.nextNode(2).sub(this.nextNode(1)).normalize();
+
+    if (nextDirection.equals(this.direction.normalize())) {
+      console.log('Going straight');
+      this.nodeIndex++;
+      return;
+    }
+    console.log('Turning');
+
+    /*
+      ~~ ANGLE NOTES ~~
+      x: 1  -> -π/2 or 3π/2
+      z: 1  -> π
+      x: -1 -> π / 2
+      z: -1 -> 0
+    */
+
+    console.log('turn current direction', this.direction);
+    console.log('turn next direction', nextDirection);
+    console.log('turn current angle', this.camera.rotation.y);
+
+    switch (nextDirection.x) {
+      case 1: this.rotateCamera(3 * Math.PI / 2); break;
+      case -1: this.rotateCamera(Math.PI / 2); break;
+      default: break;
+    }
+
+    switch (nextDirection.z) {
+      case 1: this.rotateCamera(Math.PI); break;
+      case -1: this.rotateCamera(0); break;
+      default: break;
+    }
+
+    this.nodeIndex++;
+  }
+
+  walk() {
+    console.log('Walking');
+    const aimedDirection = this.nextNode().sub(this.nextNode(0)).normalize();
+    // console.log('walk current direction', this.direction);
+    // console.log('walk aimed direction', aimedDirection);
+    if (!aimedDirection.equals(this.direction)) { return }
+
+    this.direction.round();
+    this.direction.multiplyScalar(SPEED);
+
+    this.camera.position.add(this.direction);
   }
 
   nextNode(ahead = 1) {
@@ -60,6 +102,12 @@ export default class Navigation {
   }
 
   isNodeReached() {
+    // console.log(this.camera.position.distanceTo(this.nextNode()));
     return this.camera.position.distanceTo(this.nextNode()) < SPEED
+  }
+
+  rotateCamera(angle) {
+    console.log('rotate to', angle);
+    gsap.to(this.camera.rotation, { duration: 1, y: angle});
   }
 }

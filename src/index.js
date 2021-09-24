@@ -122,7 +122,7 @@ destinations.forEach(destination => {
     new THREE.MeshBasicMaterial({ color: 0xff0000 })
   );
   // Placing the flag in the center
-  flag.position.set(destination[0] * TILE_SIZE + TILE_SIZE / 2, 2, destination[1] * TILE_SIZE + TILE_SIZE / 2)
+  flag.position.set(destination[0] * TILE_SIZE + TILE_SIZE / 2, 1, destination[1] * TILE_SIZE + TILE_SIZE / 2)
   scene.add(flag);
 });
 
@@ -155,11 +155,11 @@ for (let i = 0; i < destinations.length; i++) {
   // Display temporary path
   nodes.forEach(node => {
     const flag = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.BoxGeometry(0.2, 0.2, 0.2),
       new THREE.MeshBasicMaterial({ color: 0x00dddd })
     );
     // Placing the flag in the center
-    flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 1, node[1] * TILE_SIZE + TILE_SIZE / 2)
+    flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 0.1, node[1] * TILE_SIZE + TILE_SIZE / 2)
     scene.add(flag);
   });
 
@@ -178,7 +178,7 @@ const nav = new Navigation(path, camera, renderer);
 const animate = () => {
   // setTimeout( () => {
     requestAnimationFrame( animate );
-  // }, 50 );
+  // }, 1000 );
 
   nav.move();
 
