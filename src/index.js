@@ -7,9 +7,7 @@ import {
   TILE_SIZE,
   GRID_SIZE,
   AREA_SIZE,
-  OBSTACLE_DENSITY,
-  CAMERA_HEIGHT,
-  SPEED
+  OBSTACLE_DENSITY
 } from './Constants.js';
 
 import Navigation from './Navigation.js';
@@ -118,7 +116,7 @@ for (let z = 0; z < GRID_SIZE; z++) {
 // Display temporary flags
 destinations.forEach(destination => {
   const flag = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.BoxGeometry(0.5, 0.5, 0.5),
     new THREE.MeshBasicMaterial({ color: 0xff0000 })
   );
   // Placing the flag in the center
@@ -158,7 +156,7 @@ for (let i = 0; i < destinations.length; i++) {
       new THREE.BoxGeometry(0.2, 0.2, 0.2),
       new THREE.MeshBasicMaterial({ color: 0x00dddd })
     );
-    // Placing the flag in the center
+    // Placing the flag at tile center
     flag.position.set(node[0] * TILE_SIZE + TILE_SIZE / 2, 0.1, node[1] * TILE_SIZE + TILE_SIZE / 2)
     scene.add(flag);
   });
@@ -167,22 +165,48 @@ for (let i = 0; i < destinations.length; i++) {
   path.push(...nodes);
 }
 
+// Filter out identical consecutive nodes
+const uniquePath = path.filter((node, i) => i == 0 || node[0] != path[i-1][0] || node[1] != path[i-1][1]);
+
 const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
 gridHelper.position.x = MAP_SIZE / 2;
 gridHelper.position.z = MAP_SIZE / 2;
 scene.add(gridHelper)
 
-const nav = new Navigation(path, camera, renderer);
+// Player
+// const character = new THREE.Mesh(
+//   new THREE.BoxGeometry(1, 2, 1),
+//   new THREE.MeshBasicMaterial({ color: 0xaa9900 })
+// );
+
+const eye = new THREE.Mesh(
+  new THREE.ConeGeometry(0.5, 1, 8),
+  new THREE.MeshBasicMaterial({ color: 0xffffff })
+)
+eye.rotation.x = Math.PI / 2;
+eye.position.y = 2;
+
+const player = new THREE.Group();
+// player.add(character);
+player.add(eye);
+scene.add(player);
+
+// camera.position.set(GRID_SIZE * TILE_SIZE / 2 + 10, 30, GRID_SIZE * TILE_SIZE);
+// camera.lookAt(GRID_SIZE * TILE_SIZE / 2, 0, GRID_SIZE * TILE_SIZE / 2);
+const nav = new Navigation(uniquePath, player);
 // console.log(nav);
 
 const animate = () => {
   // setTimeout( () => {
     requestAnimationFrame( animate );
-  // }, 1000 );
+  // }, 100 );
 
+  camera.position.set(nav.camera.position.x, 10, nav.camera.position.z);
+  camera.lookAt(nav.camera.position);
+  
   nav.move();
 
-  renderer.render(scene, nav.camera);
+  renderer.render(scene, camera);
 };
 
 animate();
