@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { CAMERA_HEIGHT, SPEED, TILE_CENTER_OFFSET, TILE_SIZE } from './Constants';
+import CONSTANTS from './Constants';
 
+ const { CAMERA_HEIGHT, SPEED, TILE_CENTER_OFFSET, TILE_SIZE } = CONSTANTS;
 export default class Navigation {
   constructor(path, player) {
     console.log('Path', path);
