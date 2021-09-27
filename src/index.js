@@ -21,9 +21,9 @@ import Ground from './Ground.js';
 // import ForestTextureNZ from './images/skybox/nz.jpg';
 
 // Emile's WIP
-// import Music from './audio/Shithesizer_numero_deux.mp3';
+import Music from './audio/Shithesizer_numero_deux.mp3';
 // Chill chiptune
-import Music from './audio/chill.mp3';
+// import Music from './audio/chill.mp3';
 
 import TreeTile from './Prefabs.js';
 import { GridHelper } from 'three';
@@ -32,7 +32,7 @@ const PF = require('pathfinding');
 
 // Scene + camera setup
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 100 );
 
 // Canvas + rendering setup
 const canvas = document.querySelector('#canvas');
@@ -117,12 +117,15 @@ for (let z = 0; z < GRID_SIZE; z++) {
 destinations.forEach(destination => {
   const flag = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 0.5, 0.5),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    new THREE.MeshBasicMaterial({ color: 0xcc0000 })
   );
   // Placing the flag in the center
   flag.position.set(destination[0] * TILE_SIZE + TILE_SIZE / 2, 1, destination[1] * TILE_SIZE + TILE_SIZE / 2)
   scene.add(flag);
 });
+
+// Add way back to first destination
+destinations.push(destinations[0]);
 
 const grid = new PF.Grid(matrix);
 const finder = new PF.AStarFinder();
@@ -136,19 +139,22 @@ for (let i = 0; i < destinations.length; i++) {
   grid.setWalkableAt(destinations[j][0], destinations[j][1], true);
 
   const pathGrid = grid.clone();
-  // console.log(i);
-  // console.log(`From ${destinations[i]} to ${destinations[j]}`);
-  const nodes = finder.findPath(
-    destinations[i][0],
-    destinations[i][1],
-    destinations[j][0],
-    destinations[j][1],
-    pathGrid
-  );
-  // console.log(nodes);
-  if (nodes.length === 0) {
-    console.log(`No path from ${destinations[i]} to ${destinations[j]}!`);
-  }
+
+  let nodes = [];
+  // while (nodes.length === 0) {
+    nodes = finder.findPath(
+      destinations[i][0],
+      destinations[i][1],
+      destinations[j][0],
+      destinations[j][1],
+      pathGrid
+    );
+    // console.log(nodes);
+
+    if (nodes.length === 0) {
+      console.log(`No path from ${destinations[i]} to ${destinations[j]}!`);
+    }
+  // }
 
   // Display temporary path
   nodes.forEach(node => {
@@ -168,31 +174,25 @@ for (let i = 0; i < destinations.length; i++) {
 // Filter out identical consecutive nodes
 const uniquePath = path.filter((node, i) => i == 0 || node[0] != path[i-1][0] || node[1] != path[i-1][1]);
 
+// Remove last node which is identical the the first one
+uniquePath.splice(uniquePath.length-1, 1);
+
 const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
 gridHelper.position.x = MAP_SIZE / 2;
 gridHelper.position.z = MAP_SIZE / 2;
 scene.add(gridHelper)
 
 // Player
-// const character = new THREE.Mesh(
-//   new THREE.BoxGeometry(1, 2, 1),
-//   new THREE.MeshBasicMaterial({ color: 0xaa9900 })
-// );
-
-const eye = new THREE.Mesh(
+const character = new THREE.Mesh(
   new THREE.ConeGeometry(0.5, 1, 8),
   new THREE.MeshBasicMaterial({ color: 0xffffff })
 )
-eye.rotation.x = Math.PI / 2;
-eye.position.y = 2;
-
+character.rotation.x = Math.PI / 2;
+character.position.y = 2;
 const player = new THREE.Group();
-// player.add(character);
-player.add(eye);
+player.add(character);
 scene.add(player);
 
-// camera.position.set(GRID_SIZE * TILE_SIZE / 2 + 10, 30, GRID_SIZE * TILE_SIZE);
-// camera.lookAt(GRID_SIZE * TILE_SIZE / 2, 0, GRID_SIZE * TILE_SIZE / 2);
 const nav = new Navigation(uniquePath, player);
 // console.log(nav);
 
@@ -201,8 +201,8 @@ const animate = () => {
     requestAnimationFrame( animate );
   // }, 100 );
 
-  camera.position.set(nav.camera.position.x, 10, nav.camera.position.z);
-  camera.lookAt(nav.camera.position);
+  camera.position.set(nav.player.position.x, 40, nav.player.position.z);
+  camera.lookAt(nav.player.position);
   
   nav.move();
 
