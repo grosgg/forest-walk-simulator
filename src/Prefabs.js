@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 
-import { MAP_SIZE, TILE_SIZE } from './Constants.js';
+import CONSTANTS from './Constants.js';
 import { MathUtils } from 'three';
 
 import ConicalTree from './ConicalTree.js';
 
+const { MAP_SIZE, TILE_SIZE } = CONSTANTS;
 export default class TreeTile {
   // @param x - world space position x
   // @param z - world space position z

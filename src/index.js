@@ -1,24 +1,12 @@
 import * as THREE from 'three';
 // import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SimplexNoise from 'simplex-noise';
+import * as dat from 'dat.gui';
 
-import {
-  MAP_SIZE,
-  TILE_SIZE,
-  GRID_SIZE,
-  AREA_SIZE,
-  OBSTACLE_DENSITY
-} from './Constants.js';
+import parameters from './Constants.js';
 
 import Navigation from './Navigation.js';
 import Ground from './Ground.js';
-
-// import ForestTexturePX from './images/skybox/px.jpg';
-// import ForestTexturePY from './images/skybox/py.jpg';
-// import ForestTexturePZ from './images/skybox/pz.jpg';
-// import ForestTextureNX from './images/skybox/nx.jpg';
-// import ForestTextureNY from './images/skybox/ny.jpg';
-// import ForestTextureNZ from './images/skybox/nz.jpg';
 
 // Emile's WIP
 import Music from './audio/Shithesizer_numero_deux.mp3';
@@ -26,7 +14,14 @@ import Music from './audio/Shithesizer_numero_deux.mp3';
 // import Music from './audio/chill.mp3';
 
 import TreeTile from './Prefabs.js';
-import { GridHelper } from 'three';
+
+const {
+  MAP_SIZE,
+  TILE_SIZE,
+  GRID_SIZE,
+  AREA_SIZE,
+  OBSTACLE_DENSITY
+} = parameters;
 
 const PF = require('pathfinding');
 
@@ -39,10 +34,6 @@ const canvas = document.querySelector('#canvas');
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
-
-// Add axes helper
-const axesHelper = new THREE.AxesHelper(10);
-scene.add(axesHelper);
 
 // Audio
 // create an AudioListener and add it to the camera
@@ -73,15 +64,6 @@ for (let z = 0; z < GRID_SIZE; z++) {
   }
 }
 
-// Add skybox
-// const skyboxTexture = new THREE.CubeTextureLoader().load([
-//   ForestTexturePX,
-//   ForestTextureNX,
-//   ForestTexturePY,
-//   ForestTextureNY,
-//   ForestTexturePZ,
-//   ForestTextureNZ,
-// ]);
 scene.background = new THREE.Color( 'skyblue' );
 
 // Add ground
@@ -177,9 +159,17 @@ const uniquePath = path.filter((node, i) => i == 0 || node[0] != path[i-1][0] ||
 // Remove last node which is identical the the first one
 uniquePath.splice(uniquePath.length-1, 1);
 
-const gridHelper = new GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
+// Add axes helper
+const axesHelper = new THREE.AxesHelper(10);
+axesHelper.visible = parameters.DISPLAY_AXES;
+
+scene.add(axesHelper);
+
+// Add grid helper
+const gridHelper = new THREE.GridHelper(MAP_SIZE, GRID_SIZE, 0x4aed5f, 0xdb072a);
 gridHelper.position.x = MAP_SIZE / 2;
 gridHelper.position.z = MAP_SIZE / 2;
+gridHelper.visible = parameters.DISPLAY_GRID;
 scene.add(gridHelper)
 
 // Player
@@ -196,13 +186,29 @@ scene.add(player);
 const nav = new Navigation(uniquePath, player);
 // console.log(nav);
 
+// Debug UI
+const gui = new dat.GUI();
+gui.add(parameters, 'FPS');
+const helpersFolder = gui.addFolder('Helpers');
+helpersFolder.add(axesHelper, 'visible').name('Axes');
+helpersFolder.add(gridHelper, 'visible').name('Grid');
+
 const animate = () => {
   // setTimeout( () => {
     requestAnimationFrame( animate );
   // }, 100 );
 
-  camera.position.set(nav.player.position.x, 40, nav.player.position.z);
-  camera.lookAt(nav.player.position);
+  if (parameters.FPS) {
+    const direction = new THREE.Vector3()
+    camera.position.set(0, 0, 0);
+    nav.player.getWorldDirection(direction)
+    camera.lookAt(direction.add(nav.player.position));
+    nav.player.add(camera);
+  } else {
+    nav.player.remove(camera);
+    camera.position.set(nav.player.position.x, 40, nav.player.position.z);
+    camera.lookAt(nav.player.position);
+  }
   
   nav.move();
 
